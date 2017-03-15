@@ -1,0 +1,173 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Online Performance Monitor</title>
+		<script src="js/jquery/jquery-1.11.3.min.js"></script>
+		<script src="js/highcharts/highcharts.js"></script>
+		<script src="js/highcharts/modules/exporting.js"></script>
+	</head>
+	<body>
+
+
+
+<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
+
+
+		<script type="text/javascript">
+
+$(document).ready(function () {
+    Highcharts.setOptions({
+        global: {
+            useUTC: false
+        }
+    });
+
+    var chart = Highcharts.chart('container', {
+        chart: {
+            type: 'area',
+            animation: false, //Highcharts.svg, // don't animate in old IE
+            marginRight: 10
+        },
+        title: {
+            text: 'Online Performance Monitor'
+        },
+        xAxis: {
+            type: 'datetime'
+			,tickPixelInterval: 50
+        },
+        yAxis: {
+            title: {
+                text: 'Value'
+            },min:0,
+            plotLines: [{
+                value: 0,
+                width: 1,
+                color: '#808080'
+            }]
+        },
+        tooltip: {
+            formatter: function () {
+                return '<b>' + this.series.name + '</b><br/>' +
+                    Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br/>' +
+                    Highcharts.numberFormat(this.y, 2);
+            }
+        },
+		plotOptions: {
+            area: {
+                fillColor: {
+                    linearGradient: {
+                        x1: 0,
+                        y1: 0,
+                        x2: 0,
+                        y2: 1
+                    },
+                    stops: [
+                        [0, Highcharts.getOptions().colors[0]],
+                        [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                    ]
+                },
+                marker: {
+                    radius: 2
+                },
+                lineWidth: 1,
+                states: {
+                    hover: {
+                        lineWidth: 1
+                    }
+                },
+                threshold: null
+            }
+        }	,	
+        legend: {
+            enabled: false
+        },
+        exporting: {
+            enabled: false
+        },
+        series: [{
+            name: 'Number of requests',
+			//color:"red",
+            data: (function () {
+                // generate an array of random data
+                var data = [],
+                    time = (new Date()).getTime();
+				//data.push({x:time,y:0});
+				//data.push({x:time+2,y:30});
+
+                for (i = -500; i <= 0; i += 1) {
+                    data.push({
+                        x: time+i*500 ,
+                        y: 0
+                    });
+                }
+                return data;
+            }())
+        }]
+    });
+	var stopDisplay=0;
+	var series = chart.series[0];
+	
+	
+	var wsUri = getRootUri() + "/websockets/valeurs";
+	var websocket;
+	function getRootUri() {
+		return "ws://localhost:8098";
+	}
+
+	function onOpen(evt) {
+		afficher("CONNECTE SENDING START");
+		websocket.send("START");
+	}
+	function onMessage(evt) {
+		if (stopDisplay==0){
+			var objReturned = $.parseJSON( evt.data );
+			var receivedMetricValue = objReturned.metricValue;
+			var initialDate = objReturned.pointDate;
+			var newDate= initialDate.substr(0,initialDate.indexOf("["));
+			var x = Date.parse(newDate),
+			y = receivedMetricValue;
+			afficher("Valeur courante : " +receivedMetricValue+ " ("+newDate+")");
+			series.addPoint([x, y], true, true);	
+		}
+	}
+	function onError(evt) {
+		afficher('<span style="color: red;">ERREUR:</span> ' + evt.data);
+	}
+	function afficher(message) {
+		var ligne = document.createElement("p");
+		ligne.innerHTML = message;
+		messageDiv.innerHTML = ligne.innerHTML ;
+	}
+	
+	function init(){
+		messageDiv = document.getElementById("messageDivId");
+		websocket = new WebSocket(wsUri);	
+		websocket.onopen = function(evt) {
+			onOpen(evt)
+		};
+	   
+		websocket.onmessage = function(evt) {
+			onMessage(evt)
+		};
+	   
+		websocket.onerror = function(evt) {
+			onError(evt)
+		};
+		afficher("INIT OK");
+	}
+	function sendStop(){
+		websocket.send("STOP");
+	}
+	init();
+	$("#btn_init").click(function(){stopDisplay=0;init()});
+	$("#btn_stop").click(function(){stopDisplay=1; /*sendStop()*/});
+	
+});
+		</script>
+        <div id="messageDivId"></div>		
+		<input id="btn_init" type="button" value="Start"/>
+		<input id="btn_stop" type="button" value="Stop"/>		
+	</body>
+</html>
