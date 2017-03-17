@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.cgi</groupId>
-    <artifactId>DatabasePerformanceOnlineMonitor</artifactId>
+    <artifactId>DatabaseStressServer</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <properties>
@@ -16,6 +16,11 @@
             <artifactId>javax.websocket-api</artifactId>
             <version>1.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>1.4.194</version>
+        </dependency>        
         <dependency>
             <groupId>org.glassfish.tyrus</groupId>
             <artifactId>tyrus-server</artifactId>
@@ -53,5 +58,6 @@
             <artifactId>activemq-all</artifactId>
             <version>5.14.4</version>
         </dependency>        
-    </dependencies>    
+    </dependencies>
+    <name>DatabaseStressServer</name>
 </project>

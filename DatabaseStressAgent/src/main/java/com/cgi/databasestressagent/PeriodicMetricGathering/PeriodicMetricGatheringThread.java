@@ -27,7 +27,7 @@ public class PeriodicMetricGatheringThread extends Thread{
     
     private ActiveMQManager mqmanager;
     private boolean shouldRun = true;
-    private int DELAY_MS_BETWEEN_PROBE = 1000;
+    private int DELAY_MS_BETWEEN_PROBE = 500;
     private ObjectMapper mapper;
     private String actionName;
     

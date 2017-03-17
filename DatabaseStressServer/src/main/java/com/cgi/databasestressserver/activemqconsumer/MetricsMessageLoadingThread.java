@@ -3,8 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.cgi.databaseperformanceonlinemonitor;
+package com.cgi.databasestressserver.activemqconsumer;
 
+import com.cgi.databasestressserver.StopperSingleton;
+import com.cgi.databasestressserver.consolidationdatabase.ConsolidationDatabaseManager;
+import com.cgi.databasestressserver.websocketserver.MetricsEndPoint;
+import com.cgi.databasestressserver.domain.MetricPoint;
+import com.cgi.databasestressserver.domain.PeriodResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
@@ -28,7 +33,7 @@ import org.apache.activemq.broker.Connection;
  *
  * @author Julien
  */
-public class MetricsLoadingThread extends Thread {
+public class MetricsMessageLoadingThread extends Thread {
 
     public void run() {
         try {
@@ -55,7 +60,7 @@ public class MetricsLoadingThread extends Thread {
                     //int randomInt = randomGenerator.nextInt(100);
 
                     //A cet endroit là, on va écouter les messages sur le bus
-                    int randomInt = 0;
+                    //int randomInt = 0;
                     Message message = consumer.receive();
                     TextMessage textMessage = null ;
                     if (message instanceof TextMessage) {
@@ -65,19 +70,20 @@ public class MetricsLoadingThread extends Thread {
                         System.out.println("Received: " + message);
                     }                    
 
-                    //Puis l'émettre vers la page web en Websocket
+                    //Puis l'enregistrer en BDD
                     try{
                         ObjectMapper mapper = new ObjectMapper();
                         mapper.registerModule(new JSR310Module());
                         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
                         PeriodResult periodResult = (PeriodResult)mapper.readValue(textMessage.getText(),PeriodResult.class);
+                        ConsolidationDatabaseManager.insertPeriodResult(periodResult);
                         
-                        randomInt = periodResult.getNbExecutions();
+                        /*randomInt = periodResult.getNbExecutions();
                     
                         MetricPoint point = new MetricPoint();
                         point.setMetricValue(randomInt);
                         point.setPointDate(periodResult.getStartInterval());
-                        MetricsEndPoint.send(point);
+                        MetricsEndPoint.send(point);*/
                     } catch (Exception e){
                         System.out.println("Invalid message"+e.getMessage());
                     }
@@ -86,7 +92,7 @@ public class MetricsLoadingThread extends Thread {
                     try{
                         Thread.sleep(500);
                     } catch (InterruptedException ex) {
-                        Logger.getLogger(MetricsLoadingThread.class.getName()).log(Level.SEVERE, "Impossible d'attendre", ex);
+                        Logger.getLogger(MetricsMessageLoadingThread.class.getName()).log(Level.SEVERE, "Impossible d'attendre", ex);
                     }
             }
             consumer.close();

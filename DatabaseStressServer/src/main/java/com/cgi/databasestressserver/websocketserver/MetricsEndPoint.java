@@ -3,10 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.cgi.databaseperformanceonlinemonitor;
+package com.cgi.databasestressserver.websocketserver;
 
+import com.cgi.databasestressserver.StopperSingleton;
+import com.cgi.databasestressserver.domain.MetricPoint;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.IOException;
