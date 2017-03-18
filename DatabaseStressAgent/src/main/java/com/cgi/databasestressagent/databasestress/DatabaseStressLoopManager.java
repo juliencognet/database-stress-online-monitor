@@ -48,7 +48,7 @@ public class DatabaseStressLoopManager extends Thread{
                 }
             }
         } catch (InterruptedException ex) {
-            Logger.getLogger(DatabaseStressLoopManager.class.getName()).log(Level.SEVERE, "Erreur globale d'exécution", ex);
+            System.out.println("Thread de stress de base de donnée arrêté.");
         }
     }
     

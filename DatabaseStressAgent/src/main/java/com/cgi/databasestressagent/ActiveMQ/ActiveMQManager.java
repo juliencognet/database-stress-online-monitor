@@ -44,8 +44,8 @@ public class ActiveMQManager {
     public void sendMessage(String textMessage) throws JMSException{
         TextMessage mqmessage = this.mqsession.createTextMessage(textMessage);
         // Tell the producer to send the message
-        System.out.println("Sent message: "+ textMessage.hashCode() + " : " + Thread.currentThread().getName());
         this.mqproducer.send(mqmessage);        
+        //System.out.println("Sent message: "+ textMessage.hashCode() + " : " + Thread.currentThread().getName());        
     }
     public void closeMessageSessionAndConnection() throws JMSException{
         mqsession.close();

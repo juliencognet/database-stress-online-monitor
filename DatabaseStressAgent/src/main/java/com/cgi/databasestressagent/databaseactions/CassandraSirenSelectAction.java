@@ -47,9 +47,13 @@ public class CassandraSirenSelectAction implements AbstractDatabaseAction {
             return true;
             
         } catch (Exception e){
-            logger.log(Level.SEVERE, "Impossible de sélectionner une entreprise dans le fichier SIREN : "+e.getMessage());
-            return false;
-        }
+            if (Thread.interrupted()){
+                System.out.println("Thread de sollicitation DB interrompu");
+            } else {
+                logger.log(Level.SEVERE, "Impossible de sélectionner une entreprise dans le fichier SIREN : "+e.getMessage());
+            }
+            return false;            
+        } 
     }
     
     

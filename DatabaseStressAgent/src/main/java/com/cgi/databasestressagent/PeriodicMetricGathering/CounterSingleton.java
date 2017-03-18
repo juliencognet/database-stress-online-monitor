@@ -16,6 +16,12 @@ public class CounterSingleton {
     private PeriodResult periodResult;
     private String AgentInformation;
     private String actionName;
+    private int nbThreads=1;
+
+    public synchronized void setNbThreads(int nbThreads) {
+        this.nbThreads = nbThreads;
+    }
+    
     
     private static volatile CounterSingleton instance = null;    
      /**
@@ -56,6 +62,7 @@ public class CounterSingleton {
              //Exécution KO
              this.periodResult.setNbErrors(this.periodResult.getNbErrors()+1);
          }
+         this.periodResult.setNbStressThreads(this.nbThreads);
      }
      
      public synchronized void init(String agentInformation, String actionName){

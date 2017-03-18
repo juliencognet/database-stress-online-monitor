@@ -30,9 +30,10 @@ public class PeriodicMetricGatheringThread extends Thread{
     private int DELAY_MS_BETWEEN_PROBE = 500;
     private ObjectMapper mapper;
     private String actionName;
+    DatabaseStressParameters savedParams;
     
     public void init(DatabaseStressParameters parameters) throws JMSException{
-
+        this.savedParams=parameters;
         mqmanager = new ActiveMQManager();
         mqmanager.initMessageProducer(parameters.getActiveMQBrokerURL());
         mapper = new ObjectMapper();
@@ -43,12 +44,18 @@ public class PeriodicMetricGatheringThread extends Thread{
      
     @Override
     public void run(){
+
         try {
             CounterSingleton.getInstance().init("Host:"+InetAddress.getLocalHost()
                     +"/Thread:"+ManagementFactory.getRuntimeMXBean().getName()
                     ,this.actionName
             );
-            while (shouldRun){
+        } catch (UnknownHostException ex) {
+            Logger.getLogger(PeriodicMetricGatheringThread.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            while (shouldRun) {
+
                 //Attente
                 Thread.sleep(DELAY_MS_BETWEEN_PROBE);
 
@@ -57,11 +64,13 @@ public class PeriodicMetricGatheringThread extends Thread{
                 
                 //Conversion du message
                 String message = mapper.writeValueAsString(periodResult);
-                
+
                 mqmanager.sendMessage(message);
             }
-        } catch (JMSException | InterruptedException | JsonProcessingException | UnknownHostException ex) {
+        } catch (JMSException | JsonProcessingException ex) {
             Logger.getLogger(PeriodicMetricGatheringThread.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InterruptedException e){
+            System.out.println("Thread de récolte périodique des résultats arrêté.");
         }
     }
         
