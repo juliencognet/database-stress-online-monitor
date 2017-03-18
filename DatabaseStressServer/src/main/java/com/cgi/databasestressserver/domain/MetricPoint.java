@@ -17,6 +17,15 @@ public class MetricPoint {
     
     private ZonedDateTime pointDate;
     private int metricValue;
+    private int nbAgents;
+
+    public int getNbAgents() {
+        return nbAgents;
+    }
+
+    public void setNbAgents(int nbAgents) {
+        this.nbAgents = nbAgents;
+    }
 
     public ZonedDateTime getPointDate() {
         return pointDate;

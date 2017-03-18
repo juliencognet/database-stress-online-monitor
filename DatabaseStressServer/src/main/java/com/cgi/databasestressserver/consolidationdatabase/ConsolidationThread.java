@@ -29,16 +29,18 @@ public class ConsolidationThread extends Thread {
                 point = new MetricPoint();
                 point.setPointDate(results.get(0).getStartInterval());
                 point.setMetricValue(results.get(0).getNbExecutions());
+                point.setNbAgents(results.get(0).getNbStressThreads());
             } else {
                 point = new MetricPoint();
                 point.setPointDate(ZonedDateTime.now());
                 point.setMetricValue(0);
+                point.setNbAgents(0);
             }
             MetricsEndPoint.send(point);
-            System.out.println("Sent "+point.getPointDate().toString()+" : "+point.getMetricValue());
+            //System.out.println("Sent "+point.getPointDate().toString()+" : "+point.getMetricValue());
             
             try {
-                Thread.sleep(2000);
+                Thread.sleep(1000);
             } catch (InterruptedException ex) {
                 Logger.getLogger(ConsolidationThread.class.getName()).log(Level.SEVERE, null, ex);
             }

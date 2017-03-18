@@ -27,8 +27,7 @@ $(document).ready(function () {
     var chart = Highcharts.chart('container', {
         chart: {
             type: 'area',
-            animation: false, //Highcharts.svg, // don't animate in old IE
-            marginRight: 10
+            animation: false
         },
         title: {
             text: 'Online Performance Monitor'
@@ -37,16 +36,19 @@ $(document).ready(function () {
             type: 'datetime'
 			,tickPixelInterval: 50
         },
-        yAxis: {
+        yAxis: [{
             title: {
-                text: 'Value'
+                text: 'Nb Requests / s'
             },min:0,
             plotLines: [{
                 value: 0,
                 width: 1,
                 color: '#808080'
-            }]
-        },
+            }]} ,
+            {
+            title: {text: 'Nb agents'},opposite:true, rotation: 270, style:{color:'#f49fa8'}
+            }
+            ],
         tooltip: {
             formatter: function () {
                 return '<b>' + this.series.name + '</b><br/>' +
@@ -54,49 +56,23 @@ $(document).ready(function () {
                     Highcharts.numberFormat(this.y, 2);
             }
         },
-		plotOptions: {
-            area: {
-                fillColor: {
-                    linearGradient: {
-                        x1: 0,
-                        y1: 0,
-                        x2: 0,
-                        y2: 1
-                    },
-                    stops: [
-                        [0, Highcharts.getOptions().colors[0]],
-                        [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
-                    ]
-                },
-                marker: {
-                    radius: 2
-                },
-                lineWidth: 1,
-                states: {
-                    hover: {
-                        lineWidth: 1
-                    }
-                },
-                threshold: null
-            }
-        }	,	
         legend: {
-            enabled: false
+            enabled: true
         },
         exporting: {
             enabled: false
         },
-        series: [{
+        series: [
+            {
             name: 'Number of requests',
 			//color:"red",
+            type: 'spline',
+            yAxis:0,
             data: (function () {
                 // generate an array of random data
                 var data = [],
                     time = (new Date()).getTime();
-				//data.push({x:time,y:0});
-				//data.push({x:time+2,y:30});
-
-                for (i = -500; i <= 0; i += 1) {
+                for (i = -520; i <= -20; i += 1) {
                     data.push({
                         x: time+i*500 ,
                         y: 0
@@ -104,12 +80,32 @@ $(document).ready(function () {
                 }
                 return data;
             }())
-        }]
+        },
+        {
+            name: 'Number of agents',
+            type: 'line',
+            color: 'gray',
+            lineWidth: '1px',
+            yAxis:1,
+            data: (function () {
+                // generate an array of random data
+                var data = [],
+                    time = (new Date()).getTime();
+				//data.push({x:time,y:0});
+				//data.push({x:time+2,y:30});
+
+                for (i = -520; i <= -20; i += 1) {
+                    data.push({
+                        x: time+i*500 ,
+                        y: 0
+                    });
+                }
+                return data;
+            }())
+        }        
+            ]
     });
 	var stopDisplay=0;
-	var series = chart.series[0];
-	
-	
 	var wsUri = getRootUri() + "/websockets/valeurs";
 	var websocket;
 	function getRootUri() {
@@ -120,25 +116,32 @@ $(document).ready(function () {
 		afficher("CONNECTE SENDING START");
 		websocket.send("START");
 	}
+
 	function onMessage(evt) {
 		if (stopDisplay==0){
 			var objReturned = $.parseJSON( evt.data );
 			var receivedMetricValue = objReturned.metricValue;
+                        var nbAgentsValue = objReturned.nbAgents;
 			var initialDate = objReturned.pointDate;
 			var newDate= initialDate.substr(0,initialDate.indexOf("["));
-			var x = Date.parse(newDate),
-			y = receivedMetricValue;
-			afficher("Valeur courante : " +receivedMetricValue+ " ("+newDate+")");
-			series.addPoint([x, y], true, true);	
+			var x = Date.parse(newDate);
+                        //idx = retrieveIdxOfPoint(x);
+			afficher("Valeur : Date="
+                                + newDate 
+                                + " / Success= "
+                                + receivedMetricValue
+                                + " / Nb Agents = " + nbAgentsValue );
+			chart.series[0].addPoint([x, receivedMetricValue], true, true);	
+                        chart.series[1].addPoint([x,nbAgentsValue],true,true);
 		}
 	}
 	function onError(evt) {
 		afficher('<span style="color: red;">ERREUR:</span> ' + evt.data);
 	}
 	function afficher(message) {
-		var ligne = document.createElement("p");
-		ligne.innerHTML = message;
-		messageDiv.innerHTML = ligne.innerHTML ;
+		//var ligne = document.createElement("p");
+		//ligne.innerHTML = message;
+		//messageDiv.innerHTML = ligne.innerHTML ;
 	}
 	
 	function init(){

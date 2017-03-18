@@ -18,6 +18,15 @@ public class PeriodResult {
     }
     private String agentInformation;
     private String actionName;
+    private int nbStressThreads=1;
+
+    public int getNbStressThreads() {
+        return nbStressThreads;
+    }
+
+    public void setNbStressThreads(int nbStressThreads) {
+        this.nbStressThreads = nbStressThreads;
+    }
 
     public String getAgentInformation() {
         return agentInformation;
